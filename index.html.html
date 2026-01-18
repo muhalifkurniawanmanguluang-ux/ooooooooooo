@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linier Studio | Arsitektur & Interior Kontraktor Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@200;300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --base: #0A0A0A;
+            --surface: #161616;
+            --accent: #D4AF37;
+        }
+
+        * {
+            cursor: none !important;
+        }
+
+        body {
+            background-color: var(--base);
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, .nav-link, .footer-head {
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .playfair {
+            font-family: 'Playfair Display', serif;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* Custom Cursor */
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.2s ease-out;
+        }
+
+        /* Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Navigasi */
+        .main-nav {
+            transition: all 0.5s ease;
+        }
+
+        .main-nav.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(15px);
+            padding-top: 1.2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Buttons */
+        .btn-linier {
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 1.2rem 2.5rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .btn-linier:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-linier.fill {
+            background: #FFFFFF;
+            color: #000000;
+        }
+
+        .btn-linier.fill:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #FFFFFF;
+        }
+
+        /* Portfolio Specific Styles */
+        .portfolio-item {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+        
+        .portfolio-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 2.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portfolio-item:hover .portfolio-info {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .portfolio-item img {
+            transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portfolio-item:hover img {
+            transform: scale(1.08);
+        }
+
+        /* FRESH FOOTER STYLES */
+        .footer-link-modern {
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .footer-link-modern:hover {
+            color: var(--accent);
+            transform: translateX(8px);
+        }
+        .footer-bg-text {
+            font-size: 15vw;
+            line-height: 0.8;
+            font-weight: 900;
+            color: rgba(255,255,255,0.02);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* SPA Logic */
+        .page-section {
+            display: none;
+            opacity: 0;
+        }
+        
+        .page-section.active {
+            display: block;
+            opacity: 1;
+            animation: pageFadeIn 0.8s ease forwards;
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        input, select, textarea {
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            padding: 1rem 0 !important;
+            width: 100%;
+            color: white !important;
+            font-size: 0.9rem !important;
+            letter-spacing: 0.1em;
+            transition: border-color 0.4s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none !important;
+            border-bottom-color: var(--accent) !important;
+        }
+
+        label {
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: #666;
+            display: block;
+            margin-top: 2rem;
+        }
+
+        .category-card {
+            border: 1px solid rgba(255,255,255,0.05);
+            background: #111;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+        
+        .category-card:hover {
+            border-color: var(--accent);
+            background: #161616;
+            transform: translateY(-5px);
+        }
+
+        /* Floating Button */
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .whatsapp-btn.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Language Switcher */
+        .lang-switch {
+            font-size: 10px;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+
+        .lang-btn {
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .lang-btn.active {
+            opacity: 1;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Mobile Menu */
+        #mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        .method-step {
+            border-left: 1px solid rgba(212, 175, 55, 0.2);
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .method-step::before {
+            content: '';
+            position: absolute;
+            left: -4px; top: 0;
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem !important; }
+            .cursor-dot, .cursor-outline { display: none; }
+            * { cursor: auto !important; }
+            .lang-switch { border-left: none; padding-left: 0; margin-left: 0; margin-top: 20px; }
+        }
+    </style>
+</head>
+<body id="top">
+
+    <!-- Cursor Interaction -->
+    <div class="cursor-dot" id="dot"></div>
+    <div class="cursor-outline" id="outline"></div>
+
+    <!-- Main Navigation -->
+    <nav id="navbar" class="main-nav fixed top-0 left-0 w-full z-50 px-8 py-8 md:px-20 md:py-12 flex justify-between items-center">
+        <div class="flex items-center cursor-pointer" onclick="showPage('home')">
+             <img src="alif.jpg.png" alt="Logo" class="h-10 md:h-12 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+             <span class="hidden text-[10px] tracking-[0.4em] text-white font-bold uppercase"></span>
+        </div>
+        
+        <div class="hidden lg:flex space-x-10 items-center">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="nav-link text-[10px] hover:text-[#D4AF37] transition-colors" data-i18n="nav_home">Beranda</a>
+            <a href="javascript:void(0)" onclick="showPage('home', 'services')" class="nav-link text-[10px] hover:text-[#D4AF37] transition-colors" data-i18n="nav_services">Layanan</a>
+            <a href="javascript:void(0)" onclick="showPage('home', 'portfolio')" class="nav-link text-[10px] hover:text-[#D4AF37] transition-colors" data-i18n="nav_portfolio">Portofolio</a>
+            <a href="javascript:void(0)" onclick="showPage('home', 'method')" class="nav-link text-[10px] hover:text-[#D4AF37] transition-colors" data-i18n="nav_method">Metode</a>
+            <a href="javascript:void(0)" onclick="showPage('client')" class="nav-link text-[10px] text-[#D4AF37] border border-[#D4AF37]/50 px-4 py-2 hover:bg-[#D4AF37] hover:text-black transition-all" data-i18n="nav_client">Informasi Klien</a>
+            <a href="javascript:void(0)" onclick="showPage('home', 'contact')" class="nav-link text-[10px] hover:text-[#D4AF37] transition-colors" data-i18n="nav_contact">Kontak</a>
+            
+            <div class="lang-switch">
+                <span id="lang-id" class="lang-btn active" onclick="setLanguage('id')">ID</span>
+                <span class="text-gray-600">/</span>
+                <span id="lang-en" class="lang-btn" onclick="setLanguage('en')">EN</span>
+            </div>
+        </div>
+
+        <button id="menu-toggle" class="lg:hidden flex flex-col justify-center items-end group">
+            <div class="w-8 h-px bg-white mb-2 transition-all group-hover:w-6"></div>
+            <div class="w-6 h-px bg-white transition-all group-hover:w-8"></div>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-[#0A0A0A] z-[60] flex flex-col items-center justify-center space-y-8 lg:hidden">
+        <button id="menu-close" class="absolute top-12 right-8 text-xs tracking-widest uppercase" data-i18n="menu_close">Tutup</button>
+        <a href="javascript:void(0)" onclick="showPage('home')" class="mobile-nav-link text-2xl font-bold tracking-widest hover:text-[#D4AF37]" data-i18n="nav_home">Beranda</a>
+        <a href="javascript:void(0)" onclick="showPage('client')" class="mobile-nav-link text-2xl font-bold tracking-widest text-[#D4AF37]" data-i18n="nav_client">Informasi Klien</a>
+        <a href="javascript:void(0)" onclick="showPage('home', 'services')" class="mobile-nav-link text-2xl font-bold tracking-widest hover:text-[#D4AF37]" data-i18n="nav_services">Layanan</a>
+        <a href="javascript:void(0)" onclick="showPage('home', 'portfolio')" class="mobile-nav-link text-2xl font-bold tracking-widest hover:text-[#D4AF37]" data-i18n="nav_portfolio">Portofolio</a>
+        <a href="javascript:void(0)" onclick="showPage('home', 'method')" class="mobile-nav-link text-2xl font-bold tracking-widest hover:text-[#D4AF37]" data-i18n="nav_method">Metode</a>
+        <a href="javascript:void(0)" onclick="showPage('home', 'contact')" class="mobile-nav-link text-2xl font-bold tracking-widest hover:text-[#D4AF37]" data-i18n="nav_contact">Kontak</a>
+    </div>
+
+    <!-- === HOME PAGE === -->
+    <div id="page-home" class="page-section active">
+        <!-- Hero Section -->
+        <header class="relative h-screen flex items-center px-8 md:px-20 overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 bg-black/50 z-10"></div>
+                <img src="alif.jpg.png" class="w-full h-full object-cover grayscale brightness-50" alt="Arsitektur Mewah">
+            </div>
+            <div class="relative z-20 max-w-5xl pt-24">
+                
+                <span class="text-[10px] tracking-[0.6em] text-[#D4AF37] mb-6 block reveal">EST. 2024</span>
+                <h1 class="text-5xl md:text-8xl font-extrabold mb-8 leading-[1.1] reveal">REFINING SPACE,<br><span class="playfair italic font-normal lowercase tracking-normal">defining</span> LIFESTYLE.</h1>
+                <p class="text-sm md:text-lg font-light tracking-[0.2em] mb-12 text-gray-400 max-w-2xl reveal" data-i18n="hero_desc">Sinergi antara visi arsitektural dan ketelitian kontraktor dalam satu atap.</p>
+                <div class="flex flex-wrap gap-6 reveal">
+                    <a href="javascript:void(0)" onclick="showPage('home', 'portfolio')" class="btn-linier" data-i18n="btn_projects">Lihat Proyek</a>
+                    <a href="javascript:void(0)" onclick="showPage('client')" class="btn-linier fill" data-i18n="btn_consult">Mulai Konsultasi</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Services -->
+        <section id="services" class="py-32 px-8 md:px-20">
+            <div class="flex flex-col lg:flex-row gap-16">
+                <div class="lg:w-1/2 group reveal">
+                    <div class="overflow-hidden aspect-[16/10] mb-10 border border-white/5">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 transition-all duration-1000">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6 text-[#D4AF37]" data-i18n="service_arch_title">Architecture</h3>
+                    <p class="text-gray-400 font-light leading-relaxed max-w-md" data-i18n="service_arch_desc">Fokus pada struktur, bentuk luar, dan inovasi ruang.</p>
+                </div>
+                <div class="lg:w-1/2 group mt-0 md:mt-32 reveal">
+                    <div class="overflow-hidden aspect-[16/10] mb-10 border border-white/5">
+                        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 transition-all duration-1000">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6 text-[#D4AF37]" data-i18n="service_int_title">Interior Contractor</h3>
+                    <p class="text-gray-400 font-light leading-relaxed max-w-md" data-i18n="service_int_desc">Fokus pada craftsmanship, material premium, dan detail finishing.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Portfolio Update -->
+        <section id="portfolio" class="py-32 bg-[#161616] px-8 md:px-20">
+            <div class="flex justify-between items-end mb-20 reveal">
+                <div>
+                    <span class="text-[10px] tracking-[0.5em] text-gray-500 mb-4 block" data-i18n="portfolio_subtitle">GALLERY</span>
+                    <h2 class="text-3xl md:text-5xl font-bold uppercase" data-i18n="portfolio_title">Featured Works.</h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-8 md:gap-12">
+                <!-- Project 1 -->
+                <div class="col-span-12 md:col-span-7 reveal">
+                    <div class="portfolio-item h-[500px] md:h-[750px]" onclick="openProject('obsidian')">
+                        <img src="WhatsApp Image 2026-01-18 at 15.40.44.jpeg" class="w-full h-full object-cover" alt="The Obsidian Villa">
+                        <div class="portfolio-info">
+                            <span class="text-[10px] tracking-[0.4em] text-[#D4AF37] block mb-2 uppercase">Architecture</span>
+                            <h3 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight uppercase">THE OBSIDIAN</h3>
+                            <p class="text-xs text-gray-400 tracking-widest uppercase mb-6">Kendari, indonesia — 2024</p>
+                            <span class="text-[10px] tracking-[0.4em] text-white border-b border-white/20 pb-1 hover:border-[#D4AF37] transition-all uppercase">Detail Proyek</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 md:hidden">
+                        <h4 class="text-lg font-bold">THE OBSIDIAN</h4>
+                        <p class="text-[10px] text-gray-500 tracking-widest uppercase">Kendari / Architecture</p>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="col-span-12 md:col-span-5 md:mt-32 reveal">
+                    <div class="portfolio-item h-[500px] md:h-[650px]" onclick="openProject('linear')">
+                        <img src="WhatsApp Image 2026-01-18 at 15.40.45.jpeg" class="w-full h-full object-cover" alt="Linear Penthouse">
+                        <div class="portfolio-info">
+                            <span class="text-[10px] tracking-[0.4em] text-[#D4AF37] block mb-2 uppercase">Interior Contractor</span>
+                            <h3 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight uppercase">RHOUSE</h3>
+                            <p class="text-xs text-gray-400 tracking-widest uppercase mb-6">Kendari — 2024</p>
+                            <span class="text-[10px] tracking-[0.4em] text-white border-b border-white/20 pb-1 hover:border-[#D4AF37] transition-all uppercase">Detail Proyek</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 md:hidden">
+                        <h4 class="text-lg font-bold">R House</h4>
+                        <p class="text-[10px] text-gray-500 tracking-widest uppercase">Kendari / Interior</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Method -->
+        <section id="method" class="py-32 px-8 md:px-20">
+            <div class="mb-24 reveal">
+                <h2 class="text-3xl md:text-5xl font-bold mb-6" data-i18n="method_title">The Linier Method</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div class="reveal method-step">
+                    <h4 class="text-4xl font-bold text-gray-800 mb-6">01</h4>
+                    <h5 class="text-sm font-bold mb-4 uppercase tracking-widest text-[#D4AF37]" data-i18n="step_1_title">Consult</h5>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider" data-i18n="step_1_desc">Pendalaman visi klien secara puitis namun terukur.</p>
+                </div>
+                <div class="reveal method-step">
+                    <h4 class="text-4xl font-bold text-gray-800 mb-6">02</h4>
+                    <h5 class="text-sm font-bold mb-4 uppercase tracking-widest text-[#D4AF37]" data-i18n="step_2_title">Design</h5>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider" data-i18n="step_2_desc">Blueprint arsitektur & interior 3D dengan presisi digital.</p>
+                </div>
+                <div class="reveal method-step">
+                    <h4 class="text-4xl font-bold text-gray-800 mb-6">03</h4>
+                    <h5 class="text-sm font-bold mb-4 uppercase tracking-widest text-[#D4AF37]" data-i18n="step_3_title">Construct</h5>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider" data-i18n="step_3_desc">Eksekusi kontraktor dengan standar material premium.</p>
+                </div>
+                <div class="reveal method-step">
+                    <h4 class="text-4xl font-bold text-gray-800 mb-6">04</h4>
+                    <h5 class="text-sm font-bold mb-4 uppercase tracking-widest text-[#D4AF37]" data-i18n="step_4_title">Handover</h5>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider" data-i18n="step_4_desc">Penyerahan kunci dan kualitas hunian yang terjamin.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modern Footer -->
+        <footer id="contact" class="relative pt-40 pb-12 px-8 md:px-20 bg-[#050505] overflow-hidden border-t border-white/5">
+            <div class="absolute top-10 left-1/2 -translate-x-1/2 footer-bg-text">LINIER</div>
+            <div class="max-w-7xl mx-auto relative z-10">
+                <div class="flex flex-col lg:flex-row justify-between items-start gap-20 mb-32">
+                    <div class="lg:w-1/2 reveal">
+                        <span class="text-[10px] tracking-[0.5em] text-[#D4AF37] mb-6 block font-bold uppercase" data-i18n="footer_subtitle">Ayo Mulai</span>
+                        <h2 class="text-4xl md:text-7xl font-extrabold mb-12 leading-[1] tracking-tighter uppercase" data-i18n="footer_cta">
+                            Wujudkan <br><span class="playfair italic font-normal lowercase text-[#D4AF37]">hunian</span> impian.
+                        </h2>
+                        <a href="javascript:void(0)" onclick="showPage('client')" class="btn-linier fill" data-i18n="btn_consult_free">Mulai Konsultasi</a>
+                    </div>
+                    <div class="lg:w-1/3 grid grid-cols-2 gap-10 reveal">
+                        <div class="space-y-8">
+                            <h4 class="footer-head text-[11px] text-gray-500 font-bold">Navigasi</h4>
+                            <ul class="space-y-4">
+                                <li><a href="javascript:void(0)" onclick="showPage('home')" class="footer-link-modern text-[10px] tracking-widest uppercase">Beranda</a></li>
+                                <li><a href="javascript:void(0)" onclick="showPage('home', 'services')" class="footer-link-modern text-[10px] tracking-widest uppercase">Layanan</a></li>
+                                <li><a href="javascript:void(0)" onclick="showPage('home', 'portfolio')" class="footer-link-modern text-[10px] tracking-widest uppercase">Proyek</a></li>
+                            </ul>
+                        </div>
+                        <div class="space-y-8">
+                            <h4 class="footer-head text-[11px] text-gray-500 font-bold">Koneksi</h4>
+                            <ul class="space-y-4">
+                                <li><a href="https://instagram.com/linierstudio" class="footer-link-modern text-[10px] tracking-widest uppercase">Instagram</a></li>
+                                <li><a href="https://wa.me/6281775030638" class="footer-link-modern text-[10px] tracking-widest uppercase">WhatsApp</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 reveal">
+                    <div class="flex items-center gap-6">
+                        <img src="alif.jpg.png" alt="Logo" class="h-6 grayscale opacity-40">
+                        <p class="text-[9px] text-gray-600 tracking-[0.4em] uppercase">© 2024 LINIER STUDIO. ALL RIGHTS RESERVED.</p>
+                    </div>
+                    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="group flex items-center gap-4 text-[9px] tracking-[0.4em] text-gray-500 uppercase hover:text-white">
+                        KEMBALI KE ATAS
+                        <span class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#D4AF37] group-hover:text-[#D4AF37] transition-all">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- === PROJECT DETAIL PAGE (Dinamis) === -->
+    <div id="page-project-detail" class="page-section bg-[#0A0A0A] min-h-screen pb-32">
+        <!-- Detail Hero -->
+        <header id="detail-hero" class="relative h-[75vh] flex items-end px-8 md:px-20 pb-20 overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img id="detail-img" src="" class="w-full h-full object-cover brightness-[0.4]" alt="Project Detail">
+            </div>
+            <div class="relative z-10 w-full flex flex-col md:flex-row justify-between items-end gap-10">
+                <div class="max-w-4xl">
+                    <button onclick="showPage('home', 'portfolio')" class="text-[10px] tracking-[0.5em] text-[#D4AF37] mb-8 block uppercase font-bold">← Kembali ke Portfolio</button>
+                    <h1 id="detail-title" class="text-4xl md:text-7xl font-extrabold uppercase leading-none tracking-tighter">PROJECT TITLE</h1>
+                </div>
+                <div class="text-right">
+                    <p id="detail-loc" class="text-xs tracking-[0.4em] text-gray-400 uppercase font-light">LOCATION</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Project Narrative -->
+        <main class="py-24 px-8 md:px-20 max-w-7xl mx-auto">
+            <div class="grid grid-cols-12 gap-12 md:gap-20">
+                <div class="col-span-12 lg:col-span-4 space-y-12">
+                    <div class="reveal">
+                        <h4 class="text-[10px] text-gray-500 tracking-[0.5em] mb-4 uppercase font-bold">Kategori</h4>
+                        <p id="detail-cat" class="text-lg font-light tracking-wide text-gray-200">Kategori Proyek</p>
+                    </div>
+                    <div class="reveal">
+                        <h4 class="text-[10px] text-gray-500 tracking-[0.5em] mb-4 uppercase font-bold">Tahun Selesai</h4>
+                        <p id="detail-year" class="text-lg font-light tracking-wide text-gray-200">2024</p>
+                    </div>
+                    <div class="reveal">
+                        <h4 class="text-[10px] text-gray-500 tracking-[0.5em] mb-4 uppercase font-bold">Material Pilihan</h4>
+                        <p id="detail-mat" class="text-lg font-light tracking-wide text-gray-200">Material List</p>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-8">
+                    <div class="reveal">
+                        <h4 class="text-[10px] text-gray-500 tracking-[0.5em] mb-10 uppercase font-bold">Tentang Proyek</h4>
+                        <p id="detail-desc" class="text-xl md:text-2xl font-light leading-[1.6] text-gray-300 mb-20">
+                            Deskripsi proyek yang mendalam.
+                        </p>
+                    </div>
+                    
+                    <!-- Additional Gallery -->
+                    <div class="grid grid-cols-2 gap-4 md:gap-8">
+                        <div class="aspect-[4/5] overflow-hidden bg-white/5 reveal">
+                            <img id="sub-img-1" src="" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000">
+                        </div>
+                        <div class="aspect-[4/5] overflow-hidden bg-white/5 reveal">
+                            <img id="sub-img-2" src="" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-40 pt-20 border-t border-white/5 text-center reveal">
+                <h3 class="text-xl md:text-3xl font-bold mb-10 uppercase tracking-widest">Wujudkan <span class="playfair italic lowercase text-[#D4AF37]">konsep</span> serupa?</h3>
+                <button onclick="showPage('client')" class="btn-linier fill">Hubungi Arsitek Kami</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- === CLIENT PAGE === -->
+    <div id="page-client" class="page-section pt-40 pb-20 px-8 md:px-20 min-h-screen bg-[#0A0A0A]">
+        <div class="max-w-4xl mx-auto">
+            <div id="client-selection" class="reveal">
+                <div class="text-center mb-20">
+                    <span class="text-[10px] tracking-[0.6em] text-[#D4AF37] mb-4 block" data-i18n="select_cat">SELECT CATEGORY</span>
+                    <h2 class="text-4xl md:text-6xl font-bold mb-6" data-i18n="client_info_title">Informasi Klien.</h2>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div onclick="selectClientCategory('architecture')" class="category-card p-12 text-center group">
+                        <h3 class="text-xl font-bold tracking-widest mb-4">ARCHITECTURE</h3>
+                        <p class="text-[10px] text-gray-500 tracking-widest uppercase">Struktur & Estetika Bangunan</p>
+                    </div>
+                    <div onclick="selectClientCategory('interior')" class="category-card p-12 text-center group">
+                        <h3 class="text-xl font-bold tracking-widest mb-4">INTERIOR</h3>
+                        <p class="text-[10px] text-gray-500 tracking-widest uppercase">Interior & Furniture Contractor</p>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <button onclick="showPage('home')" class="text-[10px] tracking-widest text-gray-600 hover:text-white uppercase border-b border-gray-800 pb-1">Kembali</button>
+                </div>
+            </div>
+
+            <div id="client-form-container" class="hidden">
+                <div class="mb-16">
+                    <span id="form-category-tag" class="text-[10px] tracking-[0.6em] text-[#D4AF37] mb-4 block uppercase font-bold">Category</span>
+                    <h2 class="text-4xl font-bold mb-4">Lengkapi Data Anda.</h2>
+                    <button onclick="backToSelection()" class="text-[9px] tracking-widest text-gray-500 hover:text-[#D4AF37] uppercase">← Ubah Kategori</button>
+                </div>
+                <form id="client-form" class="space-y-12">
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div><label>Nama Lengkap</label><input type="text" id="client-name" placeholder="..." required></div>
+                        <div><label>No. WhatsApp</label><input type="tel" id="client-phone" placeholder="+62 ..." required></div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div id="architecture-fields" class="hidden">
+                            <label>Gaya Arsitektur</label>
+                            <select id="client-type-arch">
+                                <option value="Modern / Minimalist">Modern / Minimalist</option>
+                                <option value="Contemporary">Contemporary</option>
+                                <option value="Tropical / Villa">Tropical / Villa</option>
+                            </select>
+                        </div>
+                        <div id="interior-fields" class="hidden">
+                            <label>Lingkup Interior</label>
+                            <select id="client-type-int">
+                                <option value="Full House">Full House</option>
+                                <option value="Kitchen Set">Kitchen Set</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Estimasi Budget</label>
+                            <select id="client-budget" required></select>
+                        </div>
+                    </div>
+                    <div><label>Catatan Tambahan</label><textarea id="client-notes" placeholder="..." class="h-32"></textarea></div>
+                    <div class="pt-10"><button type="submit" class="btn-linier fill w-full md:w-auto">Kirim Ke WhatsApp</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp -->
+    <a href="https://wa.me/6281775030638" target="_blank" class="whatsapp-btn bg-white p-4 rounded-full text-black hover:bg-[#D4AF37] transition-all" id="wa-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+    </a>
+
+    <script>
+        const dot = document.getElementById('dot');
+        const outline = document.getElementById('outline');
+        const navbar = document.getElementById('navbar');
+        const waBtn = document.getElementById('wa-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuClose = document.getElementById('menu-close');
+        
+        let selectedCategory = '';
+
+        // Project Database
+        const projects = {
+            obsidian: {
+                title: "THE OBSIDIAN",
+                loc: "Kendari, Sulawesi Tenggara",
+                cat: "Architecture & Masterplanning",
+                year: "2024",
+                mat: "Vulcanized Stone, Dark Oak, Glass",
+                desc: "Desain rumah Klasik Modern dengan kolom megah, fasad putih elegan, pintu lengkung ikonik, dan jendela hitam yang tegas. Carport berkolom harmonis serta lantai marmer gelap menghadirkan tampilan mewah, kokoh, dan berkelas.",
+                img: "llll.jpeg",
+                sub1: "2.jpeg",
+                sub2: "llll.jpeg"
+            },
+            linear: {
+                title: "RHouse",
+                loc: "Kendari< Sulawesi Tenggara",
+                cat: "Interior Contractor & Fit-out",
+                year: "2024",
+                mat: "Italian Marble, Brass Accents, Soft Suede",
+                desc: "Dapur modern dengan kombinasi warna abu-abu80 dan kayu yang hangat, dilengkapi backsplash serta countertop marmer yang elegan. Penyimpanan serba tertutup membuat tampilan rapi, sementara pencahayaan spot dan under-cabinet light memberi kesan mewah. Layout L-shape menghadirkan fungsi maksimal dan nuansa clean yang stylish.",
+                img: "R.jpeg",
+                sub1: "RR.jpeg",
+                sub2: "R2.jpeg"
+            }
+        };
+
+        const budgetOptions = {
+            architecture: [
+                { value: "Rp 250 Jt - 500 Juta", label: "Rp 250 Jt - 500 Juta" },
+                { value: "Premium (> Rp 3 Miliar)", label: "Premium (> Rp 3 Miliar)" }
+            ],
+            interior: [
+                { value: "Rp 0 - 50 Juta", label: "Rp 0 - 50 Juta" },
+                { value: "Premium (> Rp 300 Juta)", label: "Premium (> Rp 300 Juta)" }
+            ]
+        };
+
+        const i18n = {
+            id: {
+                nav_home: "Beranda", nav_services: "Layanan", nav_portfolio: "Portofolio", nav_method: "Metode", nav_client: "Informasi Klien", nav_contact: "Kontak", 
+                hero_desc: "Sinergi antara visi arsitektural dan ketelitian kontraktor dalam satu atap.", portfolio_title: "Featured Works.", method_title: "The Linier Method", footer_cta: "Wujudkan hunian impian.", client_info_title: "Informasi Klien."
+            },
+            en: {
+                nav_home: "Home", nav_services: "Services", nav_portfolio: "Portfolio", nav_method: "Method", nav_client: "Client Info", nav_contact: "Contact", 
+                hero_desc: "Architectural vision meets contractor precision in one place.", portfolio_title: "Featured Works.", method_title: "The Linier Method", footer_cta: "Build your dream home.", client_info_title: "Client Info."
+            }
+        };
+
+        function setLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) el.innerText = i18n[lang][key];
+            });
+            document.getElementById('lang-id').classList.toggle('active', lang === 'id');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        }
+
+        function showPage(pageId, anchorId = null) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            const activePage = document.getElementById('page-' + pageId);
+            activePage.classList.add('active');
+            
+            mobileMenu.classList.remove('open');
+            if(pageId === 'client') backToSelection();
+            
+            if (anchorId && pageId === 'home') {
+                setTimeout(() => { document.getElementById(anchorId)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
+            } else { 
+                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            }
+            reveal();
+        }
+
+        function openProject(projectId) {
+            const data = projects[projectId];
+            if (!data) return;
+
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-loc').innerText = data.loc;
+            document.getElementById('detail-cat').innerText = data.cat;
+            document.getElementById('detail-year').innerText = data.year;
+            document.getElementById('detail-mat').innerText = data.mat;
+            document.getElementById('detail-desc').innerText = data.desc;
+            document.getElementById('detail-img').src = data.img;
+            document.getElementById('sub-img-1').src = data.sub1;
+            document.getElementById('sub-img-2').src = data.sub2;
+
+            showPage('project-detail');
+        }
+
+        function selectClientCategory(category) {
+            selectedCategory = category;
+            document.getElementById('client-selection').classList.add('hidden');
+            document.getElementById('client-form-container').classList.remove('hidden');
+            document.getElementById('form-category-tag').innerText = category.toUpperCase();
+            document.getElementById('architecture-fields').classList.toggle('hidden', category !== 'architecture');
+            document.getElementById('interior-fields').classList.toggle('hidden', category !== 'interior');
+            const budgetDropdown = document.getElementById('client-budget');
+            budgetDropdown.innerHTML = '';
+            budgetOptions[category].forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.label;
+                budgetDropdown.appendChild(option);
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function backToSelection() {
+            document.getElementById('client-selection').classList.remove('hidden');
+            document.getElementById('client-form-container').classList.add('hidden');
+        }
+
+        document.getElementById('client-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = `Halo Linier Studio, saya ingin konsultasi proyek ${selectedCategory}. Nama: ${document.getElementById('client-name').value}`;
+            window.open(`https://wa.me/6281775030638?text=${encodeURIComponent(message)}`, '_blank');
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+            setTimeout(() => {
+                outline.style.left = e.clientX - 16 + 'px';
+                outline.style.top = e.clientY - 16 + 'px';
+            }, 50);
+        });
+
+        menuToggle.addEventListener('click', () => mobileMenu.classList.add('open'));
+        menuClose.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+        function reveal() {
+            const windowHeight = window.innerHeight;
+            document.querySelectorAll('.reveal').forEach(el => {
+                if (el.getBoundingClientRect().top < windowHeight - 50) el.classList.add('active');
+            });
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+                waBtn.classList.add('show');
+            } else {
+                navbar.classList.remove('scrolled');
+                waBtn.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('scroll', reveal);
+        window.addEventListener('load', () => { setLanguage('id'); reveal(); });
+    </script>
+</body>
+</html>
